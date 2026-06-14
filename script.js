@@ -55,6 +55,7 @@ function GameController() {
 
     let board = Gameboard();
     const boardArray = () => board.getBoard();
+    const getBoard = () => board.getBoard();
 
     const isGameOver = () => gameOver;
 
@@ -159,6 +160,9 @@ function GameController() {
             if (checkWinner()) {
                 printNewRound();
                 console.log(`${getActivePlayer().name} won!!`);
+                const winDiv = document.querySelector(".win");
+                winDiv.innerHTML = `${getActivePlayer().name} won!!`;
+
                 gameOver = true;
                 return;
             }
@@ -178,18 +182,57 @@ function GameController() {
         printNewRound();
     };
 
-    return {getActivePlayer, playRound, resetGame};
+    return {getBoard, getActivePlayer, playRound, resetGame, isGameOver};
 
 }
 
 
-const game = GameController();
+function ScreenController () {
+    const game = GameController();
+    const playerTurnDiv = document.querySelector(".turn");
+    const boardDiv = document.querySelector(".board");
 
-game.playRound(0,0);
-game.playRound(0,2);
-game.playRound(0,1);
-game.playRound(1,1);
-game.playRound(2,2);
-game.playRound(2,0);
+    const updateScreen = () => {
+        boardDiv.textContent = "";
 
+        const board = game.getBoard();
+        const activePlayer = game.getActivePlayer();
+        
 
+        playerTurnDiv.textContent = `${activePlayer.name}'s turn...`;
+
+        board.forEach((row, rowIndex) => {
+            row.forEach((cell, columnIndex) => {
+                
+                const cellButton = document.createElement("button");
+                cellButton.classList.add("cell");
+
+                cellButton.dataset.row = rowIndex;
+                cellButton.dataset.column = columnIndex;
+                cellButton.textContent = 
+                    cell.getValue() === 0 ? "" : cell.getValue();
+                boardDiv.appendChild(cellButton);
+            })
+        })
+    };
+
+    const clickHandlerBoard = (e) => {
+        const selectedRow = e.target.dataset.row;
+        const selectedColumn = e.target.dataset.column;
+
+        if (!selectedColumn) return;
+
+        game.playRound(
+            Number(selectedRow),
+            Number(selectedColumn)
+        );
+
+        updateScreen();
+    };
+    boardDiv.addEventListener("click", clickHandlerBoard);
+
+    updateScreen();
+
+}
+
+ScreenController();
